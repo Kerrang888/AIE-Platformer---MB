@@ -28,3 +28,14 @@ Vector2.prototype.subtract = function(otherVector)
 	this.x -= otherVector.x;
 	this.y -= otherVector.y;
 }
+
+Vector2.prototype.multiply = function(otherVector)
+{
+	this.x = otherVector.x * this.x;
+	this.y = otherVector.y * this.y;
+}
+
+//normalizing
+var length = Math.sqrt(x*x + y*y);
+var normalX = x / length;
+var normalY = y / length;

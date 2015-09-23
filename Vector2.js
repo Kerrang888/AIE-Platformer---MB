@@ -1,9 +1,12 @@
 
-var a = new Vector2();
-a.set(5, 6);
+//var a = new Vector2();
+//a.set(5, 6);
 
-var b = new Vector2();
-b.set(2, -1);
+//var b = new Vector2();
+//b.set(2, -1);
+
+//normalizing
+var length = Math.sqrt(x*x + y*y);
 
 var Vector2 = function()
 {
@@ -35,7 +38,8 @@ Vector2.prototype.multiply = function(otherVector)
 	this.y = otherVector.y * this.y;
 }
 
-//normalizing
-var length = Math.sqrt(x*x + y*y);
-var normalX = x / length;
-var normalY = y / length;
+Vector2.prototype.normalize = function(otherVector)
+{
+	this.x = x / length;
+	this.y = y / length;
+}

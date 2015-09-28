@@ -1,6 +1,3 @@
-//********************************
-//Got up to part 5 of the tutorial
-//********************************
 
 var canvas = document.getElementById("gameCanvas");
 var context = canvas.getContext("2d");
@@ -32,6 +29,83 @@ var ACCEL = MAXDX * 2;
 var FRICTION = MAXDX * 6;
 var JUMP = METER * 1500;
 
+//Creating game states
+var STATE_SPLASH = 0;
+var STATE_GAME = 1;
+var STATE_GAMEOVER = 2;
+
+var gameState = STATE_SPLASH;
+
+var splashTimer = 3;
+
+function runSplash(deltaTime)
+{
+	splashTimer -= deltaTime;
+	if(splashTimer <= 0)
+	{
+		gameState = STATE_GAME;
+		return;
+	}
+	
+	context.fillStyle = "#000";
+	context.font="24px Arial";
+	context.fillText("SPLASH SCREEN", 200, 240);
+}
+
+function runGame(deltaTime)
+{
+	context.fillStyle = "#ccc";		
+	context.fillRect(0, 0, canvas.width, canvas.height);
+
+	drawMap ();
+	
+	player.update(deltaTime);
+	player.draw();
+	
+	//enemy.update(deltaTime);
+	//enemy.draw();
+	
+	// update the frame counter 
+	fpsTime += deltaTime;
+	fpsCount++;
+	if(fpsTime >= 1)
+	{
+		fpsTime -= 1;
+		fps = fpsCount;
+		fpsCount = 0;
+	}		
+		
+	// draw the FPS
+	context.fillStyle = "#f00";
+	context.font="14px Arial";
+	context.fillText("FPS: " + fps, 5, 20, 100);
+	
+	if (player.position.y >= 640)
+	{
+		gameState = STATE_GAMEOVER;
+		player.position.set(9*TILE, 0*TILE);
+		return;
+	}
+}
+var restart = false;
+function runGameOver(deltaTime)
+{
+	context.fillStyle = "#000";
+	context.font="30px Arial";
+	context.fillText("GAME OVER", 220, 240);
+	context.font="20px Arial";
+	context.fillText("PRESS 'X' TO START AGAIN", 180, 280);
+	
+	if(keyboard.isKeyDown(keyboard.KEY_X) == true)
+	{
+		splashTimer = 3;
+		gameState = STATE_SPLASH;
+	}
+}
+
+
+
+
 // This function will return the time in seconds since the function 
 // was last called
 // You should only call this function once per frame
@@ -55,8 +129,6 @@ function getDeltaTime()
 	return deltaTime;
 }
 
-//-------------------- Don't modify anything above here
-
 var SCREEN_WIDTH = canvas.width;
 var SCREEN_HEIGHT = canvas.height;
 
@@ -74,7 +146,7 @@ chuckNorris.src = "hero.png";
 
 var player = new Player();
 var keyboard = new Keyboard();
-var enemy = new Enemy();
+//var enemy = new Enemy();
 
 //load the image used for the level tiles
 var tileset = document.createElement("img");
@@ -173,33 +245,23 @@ function drawMap()
 
 function run()
 {
-	context.fillStyle = "#ccc";		
+	context.fillStyle = "#ccc";
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	
 	var deltaTime = getDeltaTime();
-
-	drawMap ();
 	
-	player.update(deltaTime);
-	player.draw();
-	
-	enemy.update(deltaTime);
-	enemy.draw();
-	
-	// update the frame counter 
-	fpsTime += deltaTime;
-	fpsCount++;
-	if(fpsTime >= 1)
+	switch(gameState)
 	{
-		fpsTime -= 1;
-		fps = fpsCount;
-		fpsCount = 0;
-	}		
-		
-	// draw the FPS
-	context.fillStyle = "#f00";
-	context.font="14px Arial";
-	context.fillText("FPS: " + fps, 5, 20, 100);
+		case STATE_SPLASH:
+		runSplash(deltaTime);
+		break;
+		case STATE_GAME:
+		runGame(deltaTime);
+		break;
+		case STATE_GAMEOVER:
+		runGameOver(deltaTime);
+		break;
+	}
 }
 
 initialize();

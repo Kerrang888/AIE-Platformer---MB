@@ -46,17 +46,17 @@ Player.prototype.update = function(deltaTime)
 	var ddx = 0;	//acceleration 
 	var ddy = GRAVITY;
 	
-	is (left)
+	if (left)
 		ddx = ddx - ACCEL;
 	else if (wasleft)
 		ddx = ddx + FRICTION;
 	
 	if (right)
-		ddx + ACCEL;
+		ddx = ddx + ACCEL;
 	else if (wasright)
 		ddx = ddx - FRICTION;
 	
-	if (jump && !this.jumping && !falling))
+	if (jump && !this.jumping && !falling)
 	{
 		ddy = ddy - JUMP;
 		this.jumping = true;
@@ -68,21 +68,68 @@ Player.prototype.update = function(deltaTime)
 	this.velocity.x = bound(this.velocity.x + (deltaTime * ddx), -MAXDX, MAXDX);
 	this.velocity.y = bound(this.velocity.y + (deltaTime * ddy), -MAXDY, MAXDY);
 	
+	if  ((wasleft && (this.velocity.x > 0)) ||
+		 (wasright && (this.velocity.x < 0)))
+	 {
+		//clamp at zero to prevent friction from making us ji8ggle to side
+		this.velocity.x = 0;
+	 }
 	
 	var tx = pixelToTile(this.position.x);
 	var ty = pixelToTile(this.position.y);
 	var nx = (this.position.x)%TILE; 	//true if player overlaps right
 	var ny = (this.position.y)%TILE; 	//true if player overlaps below
-	var cell = cellAtTileCoord(LAYER_PLATFORMS, tx + 1, ty);
-	var cellright = cellAtTileCoord(LAYER_PLATFORMS, tx, ty + 1);
+	var cell = cellAtTileCoord(LAYER_PLATFORMS, tx, ty);
+	var cellright = cellAtTileCoord(LAYER_PLATFORMS, tx + 1, ty);
+	var celldown = cellAtTileCoord(LAYER_PLATFORMS, tx, ty + 1);
 	var celldiag = cellAtTileCoord(LAYER_PLATFORMS, tx + 1, ty + 1);
+	
+	//If the player has vertical velocity, check if it has hut a platform
+	if (this.velocity.y > 0)
+	{
+		if((celldown && !cell) || (celldiag && !cellright && nx))
+		{
+			this.position.y = tileToPixel(ty);
+			this.velocity.y = 0;
+			this.falling = false;
+			this.jumping = false;
+			ny = 0;
+		}
+	}
+	else if (this.velocity.y < 0)
+	{
+		if ((cell && !celldown) || (cellright && !celldiag && nx))
+		{
+			this.position.y = tileToPixel(ty + 1);
+			this.velocity.y = 0;
+			cell = celldown;
+			cellright = celldiag;
+			ny = 0;
+		}
+	}
+	if (this.velocity.x > 0)
+	{
+		if ((cellright && !cell) || (celldiag && !celldown && ny))
+		{
+			this.position.x = tileToPixel(tx);
+			this.velocity.x = 0;
+		}
+	}
+	else if (this.velocity.x < 0)
+	{
+		if ((cell && !cellright) || (celldown && celldiag && ny))
+		{
+			this.position.x = tileToPixel(tx + 1);
+			this.velocity.x = 0;
+		}
+	}
 }
 
 Player.prototype.draw = function()
 {
 	context.save();
-		context.translate(this.x, this.y);
-		context.rotate(this.rotation);
+		context.translate(this.position.x, this.position.y);
+		context.rotate(this.position.rotation);
 		context.drawImage(this.image, -this.width/2, - this.height/2);
 	context.restore();
 }

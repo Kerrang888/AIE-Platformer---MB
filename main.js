@@ -29,6 +29,10 @@ var ACCEL = MAXDX * 2;
 var FRICTION = MAXDX * 6;
 var JUMP = METER * 1500;
 
+//creating sound variables
+var musicBackground;
+var sfxFire;
+
 //Creating game states
 var STATE_SPLASH = 0;
 var STATE_GAME = 1;
@@ -49,7 +53,7 @@ function runSplash(deltaTime)
 	
 	context.fillStyle = "#000";
 	context.font="24px Arial";
-	context.fillText("SPLASH SCREEN", 200, 240);
+	context.fillText("PLATFORMER GAME", 200, 240);
 }
 
 function runGame(deltaTime)
@@ -177,6 +181,25 @@ function initialize() {
 			 }
 		 }
 	 }
+	 musicBackground = new Howl(
+	 {
+		 urls: ["background.ogg"],
+		 loop: true,
+		 buffer: true,
+		 volume: 0.5
+	 });
+	 musicBackground.play();
+	 
+	 sfxFire = new Howl(
+	 {
+		 urls: ["fireEffect.ogg"],
+		 buffer: true,
+		 volume: 1,
+		 onend: function()
+		 {
+			 isSfxPlayer = false;
+		 }
+	 });
 }
 
 function cellAtPixelCoordPlayer(layer, x,y)

@@ -29,6 +29,12 @@ var ACCEL = MAXDX * 2;
 var FRICTION = MAXDX * 6;
 var JUMP = METER * 1500;
 
+//Score Variable
+var score = 0;
+
+//Lives Variable
+var lives = 3;
+
 //creating sound variables
 var musicBackground;
 var sfxFire;
@@ -52,9 +58,14 @@ function runSplash(deltaTime)
 	}
 	
 	context.fillStyle = "#000";
-	context.font="24px Arial";
+	context.font="30px Arial";
 	context.fillText("PLATFORMER GAME", 200, 240);
+	context.font="20px Arial";
+	context.fillText("GET READY", 300, 280);
 }
+
+var heartImage = document.createElement("img");
+heartImage.src = "heart.png";
 
 function runGame(deltaTime)
 {
@@ -62,6 +73,22 @@ function runGame(deltaTime)
 	context.fillRect(0, 0, canvas.width, canvas.height);
 
 	drawMap ();
+	
+	context.fillStyle = "black";
+	context.font="32px Arial";
+	var scoreText = "Score: " + score;
+	context.fillText(scoreText, SCREEN_WIDTH - 170, 40);
+	
+	//life counter
+	for(var i=0; i<lives; i++)
+	{
+		context.drawImage(heartImage, 20 + ((heartImage.width+2)*i), 45);
+	}
+	
+	context.fillStyle = "black";
+	context.font="32px Arial";
+	var livesText = "Lives: " + lives;
+	context.fillText(livesText, 20, 45);
 	
 	player.update(deltaTime);
 	player.draw();
@@ -83,14 +110,21 @@ function runGame(deltaTime)
 	context.fillStyle = "#f00";
 	context.font="14px Arial";
 	context.fillText("FPS: " + fps, 5, 20, 100);
-	
+
 	if (player.position.y >= 640)
 	{
-		gameState = STATE_GAMEOVER;
+		gameState = STATE_SPLASH;
 		player.position.set(9*TILE, 0*TILE);
+		lives -= 1;
+		return;
+	}
+	if (lives <= 0)
+	{
+		gameState = STATE_GAMEOVER;
 		return;
 	}
 }
+
 var restart = false;
 function runGameOver(deltaTime)
 {
@@ -104,11 +138,9 @@ function runGameOver(deltaTime)
 	{
 		splashTimer = 3;
 		gameState = STATE_SPLASH;
+		lives = 3;
 	}
 }
-
-
-
 
 // This function will return the time in seconds since the function 
 // was last called

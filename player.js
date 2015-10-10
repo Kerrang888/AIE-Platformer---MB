@@ -28,6 +28,8 @@ var Player = function()
 	this.position = new Vector2();
 	this.position.set(9*TILE, 0*TILE);
 	
+	this.isDead = false;
+	
 	this.width = 159;
 	this.height = 163;
 	
@@ -99,19 +101,29 @@ Player.prototype.update = function(deltaTime)
 		this.cooldownTimer -=deltaTime;
 	}
 	
-	if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true && this.cooldownTimer <= 0)
-	{
-		sfxFire.play();
-		this.cooldownTimer = 0.3;
-		
-		//shoot a bullet
-	}
-	
 	var wasleft = this.velocity.x < 0;
 	var wasright = this.velocity.x > 0;
 	var falling = this.falling;
 	var ddx = 0;	//acceleration 
 	var ddy = GRAVITY;
+	
+	if(keyboard.isKeyDown(keyboard.KEY_SPACE) == true && this.cooldownTimer <= 0)
+	{
+		sfxFire.play();
+		this.cooldownTimer = 0.3;
+		
+		if(this.direction == RIGHT)
+		{
+			var bullet = new Bullet(this.position.x, this.position.y, true);
+			bullets.push(bullet);
+		}
+		else
+		{
+			var bullet = new Bullet(this.position.x, this.position.y, false);
+			bullets.push(bullet);
+		}
+		
+	}
 	
 	if (left)
 		ddx = ddx - ACCEL;
@@ -195,9 +207,16 @@ Player.prototype.update = function(deltaTime)
 			this.velocity.x = 0;
 		}
 	}
+	if(tx > 0 && tx < 640 && ty > 0 && ty < 520)
+	{
+		if(cellAtTileCoord(LAYER_OBJECT_TRIGGERS, tx, ty) == true)
+		{
+			gameState = STATE_GAMEOVER;
+		}
 }
+	}
 
 Player.prototype.draw = function()
 {
-	this.sprite.draw(context, this.position.x, this.position.y);
+	this.sprite.draw(context, this.position.x - worldOffsetX, this.position.y);
 }
